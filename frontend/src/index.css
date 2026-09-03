@@ -1,22 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
-  --ink: #12141c;
-  --ink-raised: #181b26;
-  --panel: #1b1e29;
-  --panel-raised: #232735;
-  --border: #2c2f3d;
+  --ink: #0f1117;
+  --ink-raised: #161922;
+  --panel: #1b1f2c;
+  --panel-raised: #242938;
+  --border: #2a2f42;
+  --border-light: #363d54;
   --text: #edeef2;
-  --text-dim: #9599a8;
+  --text-dim: #8b90a4;
+  --text-faint: #5a5f73;
   --amber: #e3a857;
   --amber-dim: #7a6236;
+  --amber-light: #f0c178;
   --teal: #5eead4;
   --teal-dim: #2f6b62;
+  --teal-light: #7af5e0;
+  --blue: #6ba4e8;
+  --blue-dim: #3a6ba8;
+  --green: #6dd58c;
+  --green-dim: #3a8a5a;
   --error: #e8695e;
+  --error-dim: #8a3d36;
+  --warning: #e8c35e;
+  --warning-dim: #8a7336;
 
   --font-display: 'Fraunces', serif;
   --font-body: 'IBM Plex Sans', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 56px;
 }
 
 * {
@@ -37,12 +60,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 500;
   letter-spacing: -0.01em;
   margin: 0;
 }
+
+h2 { font-size: 28px; }
+h3 { font-size: 20px; }
 
 code, pre, .mono {
   font-family: var(--font-mono);
@@ -56,19 +82,21 @@ button {
   font-family: var(--font-body);
 }
 
-/* Visible keyboard focus everywhere */
 :focus-visible {
   outline: 2px solid var(--teal);
   outline-offset: 2px;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--panel-raised);
-  border-radius: 6px;
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -79,4 +107,24 @@ button {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
 }

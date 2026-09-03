@@ -1,27 +1,35 @@
 # Loopcraft
 
-An original coding-education app, started from scratch. This first pass builds out two
-features — everything else in the sidebar is a placeholder route to fill in later.
+A coding-education app with five AI-powered tools for learning, practicing, and organizing code.
 
-- **AI Tutor** — a chat interface for explaining concepts and answering "why" questions.
-- **AI Pair Programmer** — paste code into an editor and ask it to explain, find bugs,
-  suggest improvements, or complete what you started.
+## Features
 
-Stack: Vite + React frontend, FastAPI backend, calling any OpenAI-compatible chat
-endpoint (Groq, OpenAI, a self-hosted model, or a proxy in front of one).
+- **Dashboard** — activity overview with stats, recent conversations, and submission history
+- **AI Tutor** — chat-based concept tutor with saved conversation history
+- **AI Pair Programmer** — paste code for explanations, bug reports, improvements, or completion
+- **Code Challenges** — timed coding problems with AI-graded feedback (10 seeded + AI-generated)
+- **Concept Explorer** — interactive topic search with explanations and self-check quizzes
+- **Snippet Library** — save, tag, search, and edit reusable code snippets
+
+## Stack
+
+- Frontend: Vite + React 18, react-router-dom, CodeMirror 6, Supabase JS client
+- Backend: FastAPI, httpx (AI proxy), Supabase Python client (persistence)
+- Database: Supabase (Postgres with RLS)
+- AI: any OpenAI-compatible chat-completions endpoint (Groq, OpenAI, local model)
 
 ## Project structure
 
 ```
 loopcraft/
-  frontend/          Vite + React app
-    src/pages/        one file per route
-    src/components/   Sidebar, ChatMessage, CodeEditor
-    src/lib/api.js     talks to the backend
+  frontend/                Vite + React SPA
+    src/pages/             one file per route
+    src/components/        Sidebar, ChatMessage, CodeEditor
+    src/lib/               api.js (backend), supabase.js (database)
   backend/
-    app/main.py        FastAPI app + CORS
-    app/routers/        /tutor and /pair endpoints
-    app/services/        ai_client.py — swap the provider via env vars
+    app/main.py            FastAPI app + CORS
+    app/routers/           tutor, pair, challenges, concepts, conversations, snippets
+    app/services/          ai_client.py, supabase_client.py
 ```
 
 ## Running it locally
@@ -45,25 +53,14 @@ npm run dev
 ```
 
 The dev server proxies `/api` to `localhost:8000`, so no extra config is needed for
-local development.
+local development. Supabase credentials are in `.env`.
 
-## Pointing it at your own AI provider
+## Database
 
-`backend/app/services/ai_client.py` calls whatever OpenAI-compatible endpoint is set in
-`AI_API_URL`. Point it at Groq directly, OpenAI, or a proxy you already run — the request
-shape is the standard `{model, messages, temperature}` chat-completions body.
+Five tables in Supabase (single-tenant, no auth):
+- `conversations` / `messages` — tutor chat history
+- `snippets` — saved code snippets
+- `challenges` — coding challenges (10 seeded)
+- `challenge_submissions` — graded attempts
 
-## Pushing to GitHub
-
-```bash
-gh repo create loopcraft --private --source=. --remote=origin
-git add -A
-git commit -m "Initial scaffold: AI Tutor + AI Pair Programmer"
-git push -u origin main
-```
-
-## What's not built yet
-
-Courses, Practice, Challenges, Leaderboard, Achievements, and Settings are stub routes
-(`ComingSoon.jsx`) — same pattern as the two built pages, just without the feature behind
-them yet.
+All tables have RLS enabled with anon+authenticated access.

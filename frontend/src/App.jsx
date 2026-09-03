@@ -3,7 +3,9 @@ import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import AITutor from './pages/AITutor.jsx';
 import AIPairProgrammer from './pages/AIPairProgrammer.jsx';
-import ComingSoon from './pages/ComingSoon.jsx';
+import Challenges from './pages/Challenges.jsx';
+import ConceptExplorer from './pages/ConceptExplorer.jsx';
+import SnippetLibrary from './pages/SnippetLibrary.jsx';
 
 export default function App() {
   return (
@@ -14,12 +16,9 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/tutor" element={<AITutor />} />
           <Route path="/pair" element={<AIPairProgrammer />} />
-          <Route path="/courses" element={<ComingSoon title="Courses" />} />
-          <Route path="/practice" element={<ComingSoon title="Practice" />} />
-          <Route path="/challenges" element={<ComingSoon title="Challenges" />} />
-          <Route path="/leaderboard" element={<ComingSoon title="Leaderboard" />} />
-          <Route path="/achievements" element={<ComingSoon title="Achievements" />} />
-          <Route path="/settings" element={<ComingSoon title="Settings" />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/concepts" element={<ConceptExplorer />} />
+          <Route path="/snippets" element={<SnippetLibrary />} />
         </Routes>
       </main>
 
@@ -36,6 +35,7 @@ export default function App() {
         }
         main > * {
           height: 100%;
+          overflow-y: auto;
         }
       `}</style>
     </div>

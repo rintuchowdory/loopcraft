@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import pair_programmer, tutor
+from app.routers import challenges, concepts, conversations, pair_programmer, snippets, tutor
 
-app = FastAPI(title="Loopcraft API", version="0.1.0")
+app = FastAPI(title="Loopcraft API", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,6 +15,10 @@ app.add_middleware(
 
 app.include_router(tutor.router, prefix="/api")
 app.include_router(pair_programmer.router, prefix="/api")
+app.include_router(challenges.router, prefix="/api")
+app.include_router(concepts.router, prefix="/api")
+app.include_router(conversations.router, prefix="/api")
+app.include_router(snippets.router, prefix="/api")
 
 
 @app.get("/api/health")
