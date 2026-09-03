@@ -1,86 +1,147 @@
-const BASE = import.meta.env.VITE_API_BASE || '/api';
+import { supabase } from './supabase.js';
 
-async function post(path, body) {
-  const res = await fetch(`${BASE}${path}`, {
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+async function callEdgeFunction(slug, path, body) {
+  const url = `${SUPABASE_URL}/functions/v1/${slug}${path || ''}`;
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ANON_KEY}`,
+      'apikey': ANON_KEY,
+    },
     body: JSON.stringify(body),
   });
+
   if (!res.ok) {
     const detail = await res.text();
     throw new Error(`Request failed (${res.status}): ${detail}`);
   }
+
   return res.json();
 }
 
-async function get(path) {
-  const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Request failed (${res.status}): ${detail}`);
-  }
-  return res.json();
-}
-
-async function put(path, body) {
-  const res = await fetch(`${BASE}${path}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Request failed (${res.status}): ${detail}`);
-  }
-  return res.json();
-}
-
-async function del(path) {
-  const res = await fetch(`${BASE}${path}`, { method: 'DELETE' });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Request failed (${res.status}): ${detail}`);
-  }
-  return res.json();
-}
-
-// AI endpoints (backend proxy)
+// AI endpoints (Supabase Edge Functions)
 export function askTutor(messages) {
-  return post('/tutor/chat', { messages });
+  return callEdgeFunction('ai-tutor', '', { messages });
 }
 
 export function pairAssist({ code, language, action }) {
-  return post('/pair/assist', { code, language, action });
+  return callEdgeFunction('pair-programmer', '', { code, language, action });
 }
 
 export function gradeSubmission({ challengeId, code, language }) {
-  return post('/challenges/grade', { challenge_id: challengeId, code, language });
+  return callEdgeFunction('challenges', '/grade', { challenge_id: challengeId, code, language });
 }
 
 export function generateChallenge({ language, difficulty }) {
-  return post('/challenges/generate', { language, difficulty });
+  return callEdgeFunction('challenges', '/generate', { language, difficulty });
 }
 
 export function explainConcept({ concept, language }) {
-  return post('/concepts/explain', { concept, language });
+  return callEdgeFunction('concepts', '', { concept, language });
 }
 
-// Conversation endpoints (backend → Supabase)
+// Conversation management — direct Supabase queries
 export const conversations = {
-  list: () => get('/conversations'),
-  create: (title = 'New conversation', topic = null) =>
-    post('/conversations', { title, topic }),
-  update: (id, data) => put(`/conversations/${id}`, data),
-  delete: (id) => del(`/conversations/${id}`),
-  messages: (id) => get(`/conversations/${id}/messages`),
-  addMessage: (id, role, content) =>
-    post(`/conversations/${id}/messages`, { role, content }),
+  async list() {
+    const { data, error } = await supabase
+      .from('conversations')
+      .select('*')
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  async create(title = 'New conversation', topic = null) {
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert({ title, topic })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, updates) {
+    const { data, error } = await supabase
+      .from('conversations')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async delete(id) {
+    const { error } = await supabase.from('conversations').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async messages(id) {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async addMessage(id, role, content) {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({ conversation_id: id, role, content })
+      .select()
+      .single();
+    if (error) throw error;
+
+    await supabase
+      .from('conversations')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    return data;
+  },
 };
 
-// Snippet endpoints (backend → Supabase)
+// Snippet management — direct Supabase queries
 export const snippets = {
-  list: () => get('/snippets'),
-  create: (data) => post('/snippets', data),
-  update: (id, data) => put(`/snippets/${id}`, data),
-  delete: (id) => del(`/snippets/${id}`),
+  async list() {
+    const { data, error } = await supabase
+      .from('snippets')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  async create(payload) {
+    const { data, error } = await supabase
+      .from('snippets')
+      .insert(payload)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, updates) {
+    const { data, error } = await supabase
+      .from('snippets')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async delete(id) {
+    const { error } = await supabase.from('snippets').delete().eq('id', id);
+    if (error) throw error;
+  },
 };

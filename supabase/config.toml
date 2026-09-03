@@ -1,0 +1,11 @@
+[functions.ai-tutor]
+verify_jwt = false
+
+[functions.pair-programmer]
+verify_jwt = false
+
+[functions.challenges]
+verify_jwt = false
+
+[functions.concepts]
+verify_jwt = false
