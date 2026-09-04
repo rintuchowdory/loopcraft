@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import CodeEditor from '../components/CodeEditor.jsx';
+import { supabase } from '../lib/supabase.js';
 import { snippets as snippetApi } from '../lib/api.js';
 
 export default function SnippetLibrary() {
